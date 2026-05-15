@@ -117,3 +117,91 @@ end
 y = y / max(abs(y));
 
 fprintf('Processing done!\n');
+
+
+% 6) Resampling
+
+if outFs ~= Fs
+    
+    y = resample(y, outFs, Fs); 
+    % Change the sample rate of the signal
+    % Example:
+    % 44100 → 88200 (upsampling)
+    % 44100 → 22050 (downsampling)
+    
+end
+
+
+% 7) Save Output
+
+audiowrite('output.wav', y, outFs); 
+% Save the processed audio signal as a WAV file
+
+fprintf('Saved as output.wav\n');
+
+% 8) Analysis Plots
+
+
+% -------- Time Domain --------
+% Compare original signal and equalized signal
+
+figure;
+
+subplot(2,1,1);
+plot(x); 
+title('Original Signal'); 
+% Plot original waveform
+
+subplot(2,1,2);
+plot(y); 
+title('Equalized Signal'); 
+% Plot processed waveform
+
+% ----------------------------------------------------------
+
+% Power Spectral Density (PSD)
+
+% PSD shows how signal power is distributed across frequencies
+
+figure;
+
+pwelch(x,[],[],[],Fs);
+title('Original PSD');
+% Frequency content of original signal
+figure;
+
+pwelch(y,[],[],[],outFs);
+title('Equalized PSD');
+% Frequency content after equalization
+
+
+% Spectrogram
+% ================================
+% Spectrogram shows frequency changes over time
+
+figure;
+%------------------
+spectrogram(x,256,200,512,Fs,'yaxis');
+title('Original Spectrogram');
+% Original audio spectrogram
+
+figure;
+
+spectrogram(y,256,200,512,outFs,'yaxis');
+title('Equalized Spectrogram');
+% Processed audio spectrogram
+
+
+% 9) Play Audio
+% ================================
+
+sound(x, Fs); 
+% Play original audio
+
+pause(length(x)/Fs + 1); 
+% Wait until playback finishes
+
+sound(y, outFs); 
+% Play equalized audio
+
+fprintf('Done!\n');
