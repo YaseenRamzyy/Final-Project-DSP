@@ -1,4 +1,4 @@
-fprintf('=== Multi-Band Speech Equalizer ===\n'); % Display program title
+fprintf('=== Multi-Band Speech Equalizer ===\n');
 
 % 1) Read Audio File
 file = input('Enter audio file name: ', 's'); 
@@ -46,6 +46,16 @@ for i = 1:n
         i, bands(i,1), bands(i,2))); % kda el user byktb el gain w yd5lo gwa el array
     % Get gain value (in dB) for each band
 end
+% Gains are values entered by the user for each frequency band.
+% These values control whether we increase or decrease the sound level
+% in a specific frequency range.
+%
+% Example:
+% +3 dB  -> increase the volume of this band
+% -3 dB  -> decrease the volume of this band
+%
+% Each frequency band is adjusted separately,
+% then all bands are combined again to create the final equalized signal.
 
 % 4) Filter Design
 
@@ -80,13 +90,60 @@ for i = 1:n
         % IIR filter design (Butterworth)
         if low < 0.01
             [b{i},a{i}] = butter(order, high, 'low'); 
-            else0
+        else
             [b{i},a{i}] = butter(order, [low high]); 
         end
     end
 end
 
 fprintf('Filters designed!\n');
+
+
+% =========================================
+% Filter Analysis Plots
+% =========================================
+
+for i = 1:n
+
+    figure;
+
+   
+    % Magnitude + Phase Response
+   
+    subplot(2,2,1);
+
+    freqz(b{i}, a{i}, 1024, Fs);
+    title(['Frequency Response - Band ' num2str(i)]);
+    % Shows magnitude and phase response
+
+   
+    % Impulse Response
+   
+    subplot(2,2,2);
+
+    impz(b{i}, a{i});
+    title(['Impulse Response - Band ' num2str(i)]);
+    % Response of filter to one impulse
+
+    % Step Response
+
+    subplot(2,2,3);
+
+    stepz(b{i}, a{i});
+    title(['Step Response - Band ' num2str(i)]);
+    % Response of filter to step input
+
+   
+    % Pole-Zero Plot
+
+    subplot(2,2,4);
+
+    zplane(b{i}, a{i});
+    title(['Pole-Zero Plot - Band ' num2str(i)]);
+    % Shows poles and zeros of the filter
+
+end
+
 
 
 % 5) Apply Filters and Gains
@@ -126,8 +183,8 @@ if outFs ~= Fs
     y = resample(y, outFs, Fs); 
     % Change the sample rate of the signal
     % Example:
-    % 44100 → 88200 (upsampling)
-    % 44100 → 22050 (downsampling)
+    % 44100 ? 88200 (upsampling)
+    % 44100 ? 22050 (downsampling)
     
 end
 
