@@ -113,12 +113,22 @@ a = cell(1,n); %Denominator coefficients for each filter
 for i = 1:n
     
     % Normalize frequencies (range 0 to 1, where 1 = Nyquist frequency)
-    low = bands(i,1)/(Fs/2);
-    high = bands(i,2)/(Fs/2);
 
-    % Ensure valid range to avoid errors  mynf3sh 0 wla 1
-    low = max(low,0.001);
-    high = min(high,0.999);
+nyquist = Fs / 2;
+
+low  = bands(i,1) / nyquist;
+high = bands(i,2) / nyquist;
+
+% clamp to safe range so fir1 never crashes
+low  = max(low,  0.02);
+high = min(high, 0.98);
+
+% if band is too narrow after clamping, widen it slightly
+if high - low < 0.04
+    mid  = (low + high) / 2;
+    low  = max(mid - 0.02, 0.02);
+    high = min(mid + 0.02, 0.98);
+end
 
     if strcmp(type,'FIR')
         % FIR filter design
